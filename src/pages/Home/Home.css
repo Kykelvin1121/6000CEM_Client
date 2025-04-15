@@ -1,0 +1,17 @@
+/*   ---Home Slider---   */
+.homeSlide {
+    display: flex;
+    justify-content: center;
+    background-color: #f6f9fc;
+    padding-bottom: 0 !important;
+  }
+
+.products{
+  background: #f4fbff;
+}
+
+.products h1{
+  text-align: center;
+  margin: 0 auto;
+  padding: 20px;
+}

@@ -1,0 +1,114 @@
+/* TrackOrder.css */
+.track-order-container {
+    border-radius: 8px;
+    width: 800px;
+    margin: 0 auto;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 150px;
+    min-height: 100vh;
+  }
+
+.track-order-title {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 30px;
+}
+
+.order-item {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.order-id {
+  font-size: 18px;
+  color: #333;
+}
+
+.blue-color {
+    color: rgb(0, 123, 255);
+  }
+  
+  .yellow-color {
+    color: rgb(255, 123, 0);
+  }
+  
+  .green-color {
+    color: rgb(3, 230, 3)
+  }
+  
+
+.order-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.total-price {
+  font-size: 18px;
+  color: #333;
+  margin-top: 10px;
+}
+
+.ordered-products-list {
+  list-style: none;
+  padding: 0;
+}
+
+.product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e0e0e0;
+  padding-top: 20px;
+}
+
+.product-quantity {
+  font-size: 18px;
+  color: #333;
+  padding-right: 350px;
+}
+
+.product-title{
+    font-size: 20px;
+    font-weight: 500;
+    color: #333;
+    padding-left: 30px;
+    padding-top: 20px;
+    margin-bottom: -5px;
+}
+
+.product-name{
+    font-size: 18px;
+    color: #333;
+    padding-left: 30px;
+}
+
+.product-quantity {
+    font-weight: 500;
+  color: rgb(0, 123, 255);
+}
+
+.no-orders {
+  font-size: 18px;
+  margin-top: 20px;
+  text-align: center;
+  color: #888;
+}

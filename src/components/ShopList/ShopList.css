@@ -1,0 +1,12 @@
+.justify-content-center {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-direction: row !important;
+  }
+  
+  
+  .not-found {
+    margin: 40px auto 20px;
+    width: fit-content;
+  }
