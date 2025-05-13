@@ -73,29 +73,22 @@ function RegisterAndLogin({ onLogin }) {
       <div className="form-header-container">
         <div className="form-header">
           <div className={`form-tab ${login ? "active-tab" : ""}`} onClick={() => setLogin(true)}>
-            SignIn
+           Sign In
           </div>
         </div>
         <div className="form-header">
           <div className={`form-tab ${!login ? "active-tab" : ""}`} onClick={() => setLogin(false)}>
-            SignUp
+           Sign Up
           </div>
         </div>
       </div>
       <h1 className="form-title">{login ? "Sign In" : "Sign Up"}</h1>
-      <form onSubmit={(e) => handleSubmit(e, login ? "signin" : "signup")}>
+      <form onSubmit={(e) => handleSubmit(e, login ? "sign in" : "sign up")}>
         <input className="form-input" name="email" placeholder="Email" />
         <input className="form-input" name="password" type="password" placeholder="Password" />
 
         {!login && (
           <>
-            <input
-              className="form-input"
-              name="displayName"
-              placeholder="Display Name"
-              value={additionalFields.displayName}
-              onChange={handleAdditionalFieldChange}
-            />
             <input
               className="form-input"
               name="username"
@@ -107,7 +100,7 @@ function RegisterAndLogin({ onLogin }) {
               className="form-input"
               name="phoneNumber"
               placeholder="Phone Number"
-              value={additionalFields.phone}
+              value={additionalFields.phoneNumber}
               onChange={handleAdditionalFieldChange}
             />
             <input

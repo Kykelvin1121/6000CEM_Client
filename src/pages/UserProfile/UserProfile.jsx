@@ -48,16 +48,6 @@ const UserProfile = () => {
       <h1>User Profile</h1>
       <div className="profile-form">
         <div className="form-group">
-          <label htmlFor="displayName">Display Name:</label>
-          <input
-            className="profile-input"
-            type="text"
-            id="displayName"
-            value={userProfile.displayName}
-            onChange={(e) => setUserProfile({ ...userProfile, displayName: e.target.value })}
-          />
-        </div>
-        <div className="form-group">
           <label htmlFor="username">Username:</label>
           <input
             className="profile-input"
@@ -67,13 +57,24 @@ const UserProfile = () => {
             onChange={(e) => setUserProfile({ ...userProfile, username: e.target.value })}
           />
         </div>
+         <div className="form-group">
+          <label htmlFor="email">Email:</label>
+          <input
+            className="profile-input"
+            type="email"
+            id="email"
+            value={userProfile.email || ""}
+            onChange={(e) => setUserProfile({ ...userProfile, email: e.target.value })}
+            disabled // Optional: Disable editing if you don't want users to change their email
+          />
+        </div>
         <div className="form-group">
           <label htmlFor="phoneNumber">Phone Number:</label>
           <input
             className="profile-input"
             type="text"
-            id="phone"
-            value={userProfile.phone}
+            id="phoneNumber"
+            value={userProfile.phoneNumber}
             onChange={(e) => setUserProfile({ ...userProfile, phoneNumber: e.target.value })}
           />
         </div>
@@ -87,17 +88,6 @@ const UserProfile = () => {
             onChange={(e) => setUserProfile({ ...userProfile, address: e.target.value })}
           />
         </div>
-        <div className="form-group">
-          <label htmlFor="country">Country:</label>
-          <input
-            className="profile-input"
-            type="text"
-            id="country"
-            value={userProfile.country}
-            onChange={(e) => setUserProfile({ ...userProfile, country: e.target.value })}
-          />
-        </div>
-        <button className="profile-button" onClick={handleProfileUpdate}>Update Profile</button>
       </div>
     </div>
   );
