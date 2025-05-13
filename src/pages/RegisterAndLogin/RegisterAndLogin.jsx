@@ -117,13 +117,6 @@ function RegisterAndLogin({ onLogin }) {
               value={additionalFields.address}
               onChange={handleAdditionalFieldChange}
             />
-            <input
-              className="form-input"
-              name="country"
-              placeholder="Country"
-              value={additionalFields.country}
-              onChange={handleAdditionalFieldChange}
-            />
           </>
         )}
 
