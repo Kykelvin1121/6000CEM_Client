@@ -36,8 +36,8 @@ const Footer = () => {
             <Col md={3} sm={5} className='box'>
               <h2>Contact Us</h2>
               <ul>
-                <li>80-B MyHome, 11900 Bayan Lepas, Pualau Pinang.</li>
-                <li>Email: myfyp@gmail.com</li>
+                <li>1-Z, Lebuh Bukit Jambul, Bukit Jambul, 11900 Bayan Lepas, Pulau Pinang.</li>
+                <li>Email: admin@gmail.com</li>
                 <li>Phone: 012-3456789</li>
               </ul>
             </Col>

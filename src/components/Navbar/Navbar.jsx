@@ -8,7 +8,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "../../FirebaseConfig";
 import { useNavigate } from "react-router-dom";
 
-const NavBar = ({}) => {
+const NavBar = () => {
     const { CartItem, setCartItem } = useContext(DataContainer);
     const [isFixed, setIsFixed] = useState(false);
     const [openProfile, setOpenProfile] = useState(false);
@@ -69,39 +69,24 @@ const NavBar = ({}) => {
                             </Link>
                         </Nav.Item>
 
-                        <Nav.Item>
-                            <Link
-                                aria-label="Go to Cart Page"
-                                className="navbar-link"
-                                to="/cart">
-                                <span className="nav-link-label">Cart</span>
-                            </Link>
-                        </Nav.Item>
-
-                        {userRole === "admin" ||
-                            ("super_admin" && (
-                                <Nav.Item>
-                                    <a
-                                        aria-label="Go to Admin Page"
-                                        className="navbar-link"
-                                        href="https://dashboard-project-five.vercel.app/" // Specify the URL you want to link to
-                                        target="_blank" // Open in a new tab
-                                        rel="noopener noreferrer" // Recommended for security and performance
-                                    >
-                                        <span className="nav-link-label">
-                                            Admin
-                                        </span>
-                                    </a>
-                                </Nav.Item>
-                            ))}
+                        {(userRole === "admin" || userRole === "super_admin") && (
+                            <Nav.Item>
+                                <a
+                                    aria-label="Go to Admin Page"
+                                    className="navbar-link"
+                                    href="https://dashboard-project-five.vercel.app/"
+                                    target="_blank"
+                                    rel="noopener noreferrer">
+                                    <span className="nav-link-label">Admin</span>
+                                </a>
+                            </Nav.Item>
+                        )}
 
                         <Nav.Item className="expanded-cart">
                             <div className="icon-container">
                                 <i
                                     className="fas fa-user nav-icon"
-                                    onClick={() =>
-                                        setOpenProfile((prev) => !prev)
-                                    }></i>
+                                    onClick={() => setOpenProfile((prev) => !prev)}></i>
                             </div>
                             {openProfile && (
                                 <div className="dropDownProfile">
