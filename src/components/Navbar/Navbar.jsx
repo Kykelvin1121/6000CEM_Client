@@ -3,10 +3,9 @@ import { Container, Nav, Navbar } from "react-bootstrap";
 import "./navbar.css";
 import logoImage from "../../Images/Ecom.png";
 import { DataContainer } from "../../App";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../../FirebaseConfig";
-import { useNavigate } from "react-router-dom";
 
 const NavBar = () => {
     const { CartItem, setCartItem } = useContext(DataContainer);
@@ -23,10 +22,17 @@ const NavBar = () => {
         });
     };
 
-    function scrollHandler() {
-        setIsFixed(true);
-    }
-    window.addEventListener("scroll", scrollHandler);
+    useEffect(() => {
+        const scrollHandler = () => {
+            setIsFixed(true);
+        };
+
+        window.addEventListener("scroll", scrollHandler);
+
+        return () => {
+            window.removeEventListener("scroll", scrollHandler);
+        };
+    }, []);
 
     useEffect(() => {
         const storedUserRole = localStorage.getItem("userRole");
@@ -38,9 +44,11 @@ const NavBar = () => {
     useEffect(() => {
         if (CartItem.length === 0) {
             const storedCart = localStorage.getItem("cartItem");
-            setCartItem(JSON.parse(storedCart));
+            if (storedCart) {
+                setCartItem(JSON.parse(storedCart));
+            }
         }
-    }, []);
+    }, [CartItem.length, setCartItem]);
 
     return (
         <Navbar
@@ -69,7 +77,7 @@ const NavBar = () => {
                             </Link>
                         </Nav.Item>
 
-                        {(userRole === "admin" || userRole === "super_admin") && (
+                        {userRole === "admin" || userRole === "super_admin" ? (
                             <Nav.Item>
                                 <a
                                     aria-label="Go to Admin Page"
@@ -80,13 +88,14 @@ const NavBar = () => {
                                     <span className="nav-link-label">Admin</span>
                                 </a>
                             </Nav.Item>
-                        )}
+                        ) : null}
 
                         <Nav.Item className="expanded-cart">
                             <div className="icon-container">
                                 <i
                                     className="fas fa-user nav-icon"
-                                    onClick={() => setOpenProfile((prev) => !prev)}></i>
+                                    onClick={() => setOpenProfile((prev) => !prev)}
+                                ></i>
                             </div>
                             {openProfile && (
                                 <div className="dropDownProfile">
@@ -106,12 +115,18 @@ const NavBar = () => {
                                             </Link>
                                         </li>
                                         <li>
-                                            <a
-                                                href="#"
+                                            <button
                                                 onClick={handleSignOut}
-                                                className="dropDown">
+                                                className="dropDown"
+                                                style={{
+                                                    background: "none",
+                                                    border: "none",
+                                                    padding: 0,
+                                                    color: "inherit",
+                                                    cursor: "pointer",
+                                                }}>
                                                 Sign Out
-                                            </a>
+                                            </button>
                                         </li>
                                     </ul>
                                 </div>
