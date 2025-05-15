@@ -19,9 +19,9 @@ const ProductDetails = () => {
     const { id } = useParams();
 
     const [quantity, setQuantity] = useState(1);
-    const [remark, setRemark] = useState("");  // <-- New state for user remark
+    const [remark, setRemark] = useState("");  // Remark state
 
-    // Fetch product data
+    // Fetch product data from Firestore
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -39,13 +39,20 @@ const ProductDetails = () => {
         fetchData();
     }, []);
 
+    // Restore selectedProduct from localStorage if page refreshes
     if (!selectedProduct) {
         const storedProduct = localStorage.getItem(`selectedProduct-${id}`);
         setSelectedProduct(JSON.parse(storedProduct));
     }
 
+    // Handle quantity change with minimum of 1
     const handleQuantityChange = (event) => {
-        setQuantity(parseInt(event.target.value));
+        const value = parseInt(event.target.value);
+        if (value >= 1) {
+            setQuantity(value);
+        } else {
+            setQuantity(1);
+        }
     };
 
     const handleRemarkChange = (event) => {
@@ -55,8 +62,12 @@ const ProductDetails = () => {
     const handleAdd = (selectedProduct, quantity, product, remark) => {
         const totalQuantity = product.wh1qty + product.wh2qty + product.wh3qty;
 
+        if (quantity < 1) {
+            toast.error("Please enter a valid quantity.");
+            return;
+        }
+
         if (totalQuantity > 0) {
-            // Pass the remark along with product and quantity to addToCart
             addToCart(selectedProduct, quantity, remark);
             toast.success("Product has been added to cart!");
         } else {
@@ -88,7 +99,7 @@ const ProductDetails = () => {
                             <div className="info">
                                 <span className="price">RM{selectedProduct?.price}</span>
 
-                                {/* New remark input */}
+                                {/* Remark input */}
                                 <input
                                     type="text"
                                     className="remark-input"
@@ -105,13 +116,18 @@ const ProductDetails = () => {
                                     }}
                                 />
                             </div>
+
+                            {/* Quantity input */}
                             <input
                                 className="qty-input"
                                 type="number"
                                 placeholder="Qty"
                                 value={quantity}
+                                min={1}
                                 onChange={handleQuantityChange}
                             />
+
+                            {/* Add To Cart button */}
                             <button
                                 aria-label="Add"
                                 type="submit"
@@ -124,6 +140,8 @@ const ProductDetails = () => {
                     </Row>
                 </Container>
             </section>
+
+            {/* Related Products */}
             <section className="related-products">
                 <Container>
                     <h3>You might also like</h3>

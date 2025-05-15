@@ -3,15 +3,51 @@ import { db, auth } from "../../FirebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import './UserProfile.css';
 
+const validStates = [
+  "Johor", "Kedah", "Kelantan", "Melaka", "Negeri Sembilan", "Pahang",
+  "Penang", "Perak", "Perlis", "Sabah", "Sarawak", "Selangor",
+  "Terengganu", "Kuala Lumpur", "Putrajaya", "Labuan"
+];
+
+const isValidAddress = (street, postcode, state) => {
+  const postcodePattern = /^\d{5}$/;
+  const isValidStreet = street.trim().length >= 5;
+  const isValidPostcode = postcodePattern.test(postcode);
+  const isValidState = validStates.includes(state);
+  return isValidStreet && isValidPostcode && isValidState;
+};
+
 const UserProfile = () => {
   const [userProfile, setUserProfile] = useState({
     email: "",
     username: "",
     phoneNumber: "",
-    address: "",
   });
 
+  // Separate address fields for form
+  const [street, setStreet] = useState("");
+  const [postcode, setPostcode] = useState("");
+  const [state, setState] = useState("");
+
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // Parse address string to separate fields
+  const parseAddress = (addressString) => {
+    if (!addressString) return { street: "", postcode: "", state: "" };
+    const parts = addressString.split(",").map(part => part.trim());
+    // Assume format: "street, postcode, state"
+    return {
+      street: parts[0] || "",
+      postcode: parts[1] || "",
+      state: parts[2] || ""
+    };
+  };
+
+  // Combine address fields to single string
+  const combineAddress = (street, postcode, state) => {
+    return `${street.trim()}, ${postcode.trim()}, ${state.trim()}`;
+  };
 
   // Fetch user profile from Firestore
   const fetchUserProfile = async () => {
@@ -22,11 +58,15 @@ const UserProfile = () => {
       if (docSnapshot.exists()) {
         const data = docSnapshot.data();
         setUserProfile({
-          email: user.email || "",
+          email: data.email || user.email || "",
           username: data.username || "",
           phoneNumber: data.phoneNumber || "",
-          address: data.address || "",
         });
+
+        const { street, postcode, state } = parseAddress(data.address || "");
+        setStreet(street);
+        setPostcode(postcode);
+        setState(state);
       }
     }
   };
@@ -36,23 +76,40 @@ const UserProfile = () => {
     fetchUserProfile();
   }, []);
 
-  // Handle profile update
   const handleProfileUpdate = async () => {
-    try {
-      const user = auth.currentUser;
-      if (user) {
-        const userDocRef = doc(db, "users", user.uid);
-        const { email, ...updatableData } = userProfile;
-        await updateDoc(userDocRef, updatableData);
-        setSuccessMessage("Profile updated successfully!");
+    setErrorMessage("");
+    setSuccessMessage("");
 
-        // Auto-clear message after 3 seconds
-        setTimeout(() => {
-          setSuccessMessage("");
-        }, 3000);
-      }
+    if (!isValidAddress(street, postcode, state)) {
+      setErrorMessage(
+        "Invalid address. Ensure street ≥ 5 characters, postcode = 5 digits, and state is selected."
+      );
+      return;
+    }
+
+    const user = auth.currentUser;
+    if (!user) {
+      setErrorMessage("No authenticated user.");
+      return;
+    }
+
+    try {
+      const userDocRef = doc(db, "users", user.uid);
+      const combinedAddress = combineAddress(street, postcode, state);
+
+      await updateDoc(userDocRef, {
+        ...userProfile,
+        address: combinedAddress,
+      });
+
+      setSuccessMessage("Profile updated successfully!");
+      setTimeout(() => {
+        setSuccessMessage("");
+        setErrorMessage("");
+      }, 3000);
     } catch (error) {
       console.error("Error updating user profile:", error);
+      setErrorMessage(error.message || "Failed to update profile.");
     }
   };
 
@@ -61,6 +118,7 @@ const UserProfile = () => {
       <h1>User Profile</h1>
 
       {successMessage && <div className="success-message">{successMessage}</div>}
+      {errorMessage && <div className="error-message">{errorMessage}</div>}
 
       <div className="profile-form">
         <div className="form-group">
@@ -70,9 +128,12 @@ const UserProfile = () => {
             type="email"
             id="email"
             value={userProfile.email}
-            readOnly
+            onChange={(e) =>
+              setUserProfile({ ...userProfile, email: e.target.value })
+            }
           />
         </div>
+
         <div className="form-group">
           <label htmlFor="username">Username:</label>
           <input
@@ -85,6 +146,7 @@ const UserProfile = () => {
             }
           />
         </div>
+
         <div className="form-group">
           <label htmlFor="phoneNumber">Phone Number:</label>
           <input
@@ -97,18 +159,48 @@ const UserProfile = () => {
             }
           />
         </div>
+
+        {/* Address fields broken down */}
+
         <div className="form-group">
-          <label htmlFor="address">Address:</label>
+          <label htmlFor="street">Street Address:</label>
           <input
             className="profile-input"
             type="text"
-            id="address"
-            value={userProfile.address}
-            onChange={(e) =>
-              setUserProfile({ ...userProfile, address: e.target.value })
-            }
+            id="street"
+            value={street}
+            onChange={(e) => setStreet(e.target.value)}
           />
         </div>
+
+        <div className="form-group">
+          <label htmlFor="postcode">Postcode:</label>
+          <input
+            className="profile-input"
+            type="text"
+            id="postcode"
+            value={postcode}
+            onChange={(e) => setPostcode(e.target.value)}
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="state">State:</label>
+          <select
+            className="profile-input"
+            id="state"
+            value={state}
+            onChange={(e) => setState(e.target.value)}
+          >
+            <option value="">Select State</option>
+            {validStates.map((stateName) => (
+              <option key={stateName} value={stateName}>
+                {stateName}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <button className="profile-button" onClick={handleProfileUpdate}>
           Update Profile
         </button>
