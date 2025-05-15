@@ -5,21 +5,26 @@ import './UserProfile.css';
 
 const UserProfile = () => {
   const [userProfile, setUserProfile] = useState({
-    displayName: "",
+    email: "",
     username: "",
     phoneNumber: "",
     address: "",
-    country: "",
   });
 
-  // Function to fetch the user's profile data from Firestore
+  // Fetch the user's profile data from Firestore
   const fetchUserProfile = async () => {
     const user = auth.currentUser;
     if (user) {
       const userDocRef = doc(db, "users", user.uid);
       const docSnapshot = await getDoc(userDocRef);
       if (docSnapshot.exists()) {
-        setUserProfile(docSnapshot.data());
+        const data = docSnapshot.data();
+        setUserProfile({
+          email: user.email || "", // from Firebase Auth
+          username: data.username || "",
+          phoneNumber: data.phoneNumber || "",
+          address: data.address || "",
+        });
       }
     }
   };
@@ -29,13 +34,14 @@ const UserProfile = () => {
     fetchUserProfile();
   }, []);
 
-  // Function to handle profile data updates
+  // Update profile
   const handleProfileUpdate = async () => {
     try {
       const user = auth.currentUser;
       if (user) {
         const userDocRef = doc(db, "users", user.uid);
-        await updateDoc(userDocRef, userProfile);
+        const { email, ...updatableData } = userProfile; // exclude email from update
+        await updateDoc(userDocRef, updatableData);
         console.log("User profile updated");
       }
     } catch (error) {
@@ -48,13 +54,13 @@ const UserProfile = () => {
       <h1>User Profile</h1>
       <div className="profile-form">
         <div className="form-group">
-          <label htmlFor="displayName">Display Name:</label>
+          <label htmlFor="email">Email:</label>
           <input
             className="profile-input"
-            type="text"
-            id="displayName"
-            value={userProfile.displayName}
-            onChange={(e) => setUserProfile({ ...userProfile, displayName: e.target.value })}
+            type="email"
+            id="email"
+            value={userProfile.email}
+            readOnly
           />
         </div>
         <div className="form-group">
@@ -72,8 +78,8 @@ const UserProfile = () => {
           <input
             className="profile-input"
             type="text"
-            id="phone"
-            value={userProfile.phone}
+            id="phoneNumber"
+            value={userProfile.phoneNumber}
             onChange={(e) => setUserProfile({ ...userProfile, phoneNumber: e.target.value })}
           />
         </div>
@@ -87,20 +93,12 @@ const UserProfile = () => {
             onChange={(e) => setUserProfile({ ...userProfile, address: e.target.value })}
           />
         </div>
-        <div className="form-group">
-          <label htmlFor="country">Country:</label>
-          <input
-            className="profile-input"
-            type="text"
-            id="country"
-            value={userProfile.country}
-            onChange={(e) => setUserProfile({ ...userProfile, country: e.target.value })}
-          />
-        </div>
-        <button className="profile-button" onClick={handleProfileUpdate}>Update Profile</button>
+        <button className="profile-button" onClick={handleProfileUpdate}>
+          Update Profile
+        </button>
       </div>
     </div>
   );
-}
+};
 
 export default UserProfile;

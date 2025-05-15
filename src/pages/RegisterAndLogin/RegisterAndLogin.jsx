@@ -1,14 +1,22 @@
 import React, { useState } from "react";
 import { auth, db } from "../../FirebaseConfig";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import logoImage from "../../Images/Ecom.png";
 import "./RegisterAndLogin.css";
 import "../../index.css";
 
 function RegisterAndLogin({ onLogin }) {
-  const [login, setLogin] = useState(false);
+  const [login, setLogin] = useState(false); // false = signup, true = signin
   const [additionalFields, setAdditionalFields] = useState({
     username: "",
     phoneNumber: "",
@@ -16,6 +24,7 @@ function RegisterAndLogin({ onLogin }) {
     country: "",
     displayName: "",
   });
+
   const history = useNavigate();
 
   const handleAdditionalFieldChange = (e) => {
@@ -38,18 +47,19 @@ function RegisterAndLogin({ onLogin }) {
           email,
           password,
           role: "user",
-          ...additionalFields, 
+          ...additionalFields,
           timeStamp: serverTimestamp(),
         });
 
-        console.log("User role and additional fields stored in Firestore");
+        console.log("User registered and stored in Firestore");
         history("/home");
-      } else {
+
+      } else if (type === "signin") {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         const userDocRef = doc(db, "users", user.uid);
         const docSnapshot = await getDoc(userDocRef);
-  
+
         if (docSnapshot.exists()) {
           const userRole = docSnapshot.data().role;
           onLogin({ role: userRole });
@@ -61,7 +71,7 @@ function RegisterAndLogin({ onLogin }) {
       console.error("Authentication error:", error);
       alert(error.code);
     }
-  }
+  };
 
   const handleReset = () => {
     history("/reset");
@@ -72,20 +82,28 @@ function RegisterAndLogin({ onLogin }) {
       <img src={logoImage} alt="Logo" className="logo" />
       <div className="form-header-container">
         <div className="form-header">
-          <div className={`form-tab ${login ? "active-tab" : ""}`} onClick={() => setLogin(true)}>
-           Sign In
+          <div
+            className={`form-tab ${login ? "active-tab" : ""}`}
+            onClick={() => setLogin(true)}
+          >
+            Sign In
           </div>
         </div>
         <div className="form-header">
-          <div className={`form-tab ${!login ? "active-tab" : ""}`} onClick={() => setLogin(false)}>
-           Sign Up
+          <div
+            className={`form-tab ${!login ? "active-tab" : ""}`}
+            onClick={() => setLogin(false)}
+          >
+            Sign Up
           </div>
         </div>
       </div>
+
       <h1 className="form-title">{login ? "Sign In" : "Sign Up"}</h1>
-      <form onSubmit={(e) => handleSubmit(e, login ? "sign in" : "sign up")}>
-        <input className="form-input" name="email" placeholder="Email" />
-        <input className="form-input" name="password" type="password" placeholder="Password" />
+
+      <form onSubmit={(e) => handleSubmit(e, login ? "signin" : "signup")}>
+        <input className="form-input" name="email" placeholder="Email" required />
+        <input className="form-input" name="password" type="password" placeholder="Password" required />
 
         {!login && (
           <>
@@ -95,6 +113,7 @@ function RegisterAndLogin({ onLogin }) {
               placeholder="Username"
               value={additionalFields.username}
               onChange={handleAdditionalFieldChange}
+              required
             />
             <input
               className="form-input"
@@ -102,6 +121,7 @@ function RegisterAndLogin({ onLogin }) {
               placeholder="Phone Number"
               value={additionalFields.phoneNumber}
               onChange={handleAdditionalFieldChange}
+              required
             />
             <input
               className="form-input"
@@ -109,6 +129,7 @@ function RegisterAndLogin({ onLogin }) {
               placeholder="Address"
               value={additionalFields.address}
               onChange={handleAdditionalFieldChange}
+              required
             />
           </>
         )}
@@ -116,7 +137,10 @@ function RegisterAndLogin({ onLogin }) {
         <p className="forgot-password" onClick={handleReset}>
           Forgot Password?
         </p>
-        <button className="form-button">{login ? "Sign In" : "Sign Up"}</button>
+
+        <button className="form-button" type="submit">
+          {login ? "Sign In" : "Sign Up"}
+        </button>
       </form>
     </div>
   );
