@@ -11,7 +11,9 @@ const UserProfile = () => {
     address: "",
   });
 
-  // Fetch the user's profile data from Firestore
+  const [successMessage, setSuccessMessage] = useState("");
+
+  // Fetch user profile from Firestore
   const fetchUserProfile = async () => {
     const user = auth.currentUser;
     if (user) {
@@ -20,7 +22,7 @@ const UserProfile = () => {
       if (docSnapshot.exists()) {
         const data = docSnapshot.data();
         setUserProfile({
-          email: user.email || "", // from Firebase Auth
+          email: user.email || "",
           username: data.username || "",
           phoneNumber: data.phoneNumber || "",
           address: data.address || "",
@@ -34,15 +36,20 @@ const UserProfile = () => {
     fetchUserProfile();
   }, []);
 
-  // Update profile
+  // Handle profile update
   const handleProfileUpdate = async () => {
     try {
       const user = auth.currentUser;
       if (user) {
         const userDocRef = doc(db, "users", user.uid);
-        const { email, ...updatableData } = userProfile; // exclude email from update
+        const { email, ...updatableData } = userProfile;
         await updateDoc(userDocRef, updatableData);
-        console.log("User profile updated");
+        setSuccessMessage("Profile updated successfully!");
+
+        // Auto-clear message after 3 seconds
+        setTimeout(() => {
+          setSuccessMessage("");
+        }, 3000);
       }
     } catch (error) {
       console.error("Error updating user profile:", error);
@@ -52,6 +59,9 @@ const UserProfile = () => {
   return (
     <div className="profile-container">
       <h1>User Profile</h1>
+
+      {successMessage && <div className="success-message">{successMessage}</div>}
+
       <div className="profile-form">
         <div className="form-group">
           <label htmlFor="email">Email:</label>
@@ -70,7 +80,9 @@ const UserProfile = () => {
             type="text"
             id="username"
             value={userProfile.username}
-            onChange={(e) => setUserProfile({ ...userProfile, username: e.target.value })}
+            onChange={(e) =>
+              setUserProfile({ ...userProfile, username: e.target.value })
+            }
           />
         </div>
         <div className="form-group">
@@ -80,7 +92,9 @@ const UserProfile = () => {
             type="text"
             id="phoneNumber"
             value={userProfile.phoneNumber}
-            onChange={(e) => setUserProfile({ ...userProfile, phoneNumber: e.target.value })}
+            onChange={(e) =>
+              setUserProfile({ ...userProfile, phoneNumber: e.target.value })
+            }
           />
         </div>
         <div className="form-group">
@@ -90,7 +104,9 @@ const UserProfile = () => {
             type="text"
             id="address"
             value={userProfile.address}
-            onChange={(e) => setUserProfile({ ...userProfile, address: e.target.value })}
+            onChange={(e) =>
+              setUserProfile({ ...userProfile, address: e.target.value })
+            }
           />
         </div>
         <button className="profile-button" onClick={handleProfileUpdate}>
