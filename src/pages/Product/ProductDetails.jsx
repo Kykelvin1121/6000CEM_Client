@@ -18,7 +18,10 @@ const ProductDetails = () => {
     const { selectedProduct, setSelectedProduct, addToCart } = useContext(DataContainer);
     const { id } = useParams();
 
-    // Use useEffect for fetching product data
+    const [quantity, setQuantity] = useState(1);
+    const [remark, setRemark] = useState("");  // <-- New state for user remark
+
+    // Fetch product data
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -33,7 +36,7 @@ const ProductDetails = () => {
             }
         };
 
-        fetchData(); // Call the fetchData function directly
+        fetchData();
     }, []);
 
     if (!selectedProduct) {
@@ -41,23 +44,26 @@ const ProductDetails = () => {
         setSelectedProduct(JSON.parse(storedProduct));
     }
 
-    const [quantity, setQuantity] = useState(1);
     const handleQuantityChange = (event) => {
         setQuantity(parseInt(event.target.value));
     };
 
-    const handleAdd = (selectedProduct, quantity, product) => {
+    const handleRemarkChange = (event) => {
+        setRemark(event.target.value);
+    };
+
+    const handleAdd = (selectedProduct, quantity, product, remark) => {
         const totalQuantity = product.wh1qty + product.wh2qty + product.wh3qty;
 
         if (totalQuantity > 0) {
-            addToCart(selectedProduct, quantity);
+            // Pass the remark along with product and quantity to addToCart
+            addToCart(selectedProduct, quantity, remark);
             toast.success("Product has been added to cart!");
         } else {
             toast.error("This product is out of stock and cannot be added to the cart.");
         }
     };
 
-    // Use useEffect for related products
     useEffect(() => {
         window.scrollTo(0, 0);
         setRelatedProducts(
@@ -81,13 +87,36 @@ const ProductDetails = () => {
                             <span className="desc">{selectedProduct?.desc}</span>
                             <div className="info">
                                 <span className="price">RM{selectedProduct?.price}</span>
+
+                                {/* New remark input */}
+                                <input
+                                    type="text"
+                                    className="remark-input"
+                                    placeholder="Remark"
+                                    value={remark}
+                                    onChange={handleRemarkChange}
+                                    style={{
+                                        marginTop: '10px',
+                                        padding: '6px 10px',
+                                        width: '100%',
+                                        maxWidth: '300px',
+                                        borderRadius: '4px',
+                                        border: '1px solid #ccc',
+                                    }}
+                                />
                             </div>
-                            <input className="qty-input" type="number" placeholder="Qty" value={quantity} onChange={handleQuantityChange} />
+                            <input
+                                className="qty-input"
+                                type="number"
+                                placeholder="Qty"
+                                value={quantity}
+                                onChange={handleQuantityChange}
+                            />
                             <button
                                 aria-label="Add"
                                 type="submit"
                                 className="add"
-                                onClick={() => handleAdd(selectedProduct, quantity, selectedProduct)}
+                                onClick={() => handleAdd(selectedProduct, quantity, selectedProduct, remark)}
                             >
                                 Add To Cart
                             </button>

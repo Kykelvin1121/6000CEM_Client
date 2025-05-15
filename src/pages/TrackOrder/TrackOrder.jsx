@@ -18,7 +18,7 @@ const TrackOrder = () => {
         }
       });
       setOrders(orders);
-    })
+    });
     return () => {
       trackOrders();
     };
@@ -54,6 +54,7 @@ const TrackOrder = () => {
                 <ul className="ordered-products-list">
                   {order.products.map((product) => (
                     <li key={product.id} className="product-item">
+                      <img src={product.img} alt={product.title} className="product-image" />
                       <p className="product-name">{product.title}</p>
                       <p className="product-quantity">Quantity: {product.qty}</p>
                     </li>
