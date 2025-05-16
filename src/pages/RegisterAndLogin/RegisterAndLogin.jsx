@@ -25,7 +25,7 @@ function RegisterAndLogin({ onLogin }) {
     state: "",
   });
 
-  const history = useNavigate();
+  const navigate = useNavigate();
 
   const handleAdditionalFieldChange = (e) => {
     const { name, value } = e.target;
@@ -35,29 +35,13 @@ function RegisterAndLogin({ onLogin }) {
   const isValidAddress = (street, postcode, state) => {
     const postcodePattern = /^\d{5}$/;
     const validStates = [
-      "Johor",
-      "Kedah",
-      "Kelantan",
-      "Melaka",
-      "Negeri Sembilan",
-      "Pahang",
-      "Penang",
-      "Perak",
-      "Perlis",
-      "Sabah",
-      "Sarawak",
-      "Selangor",
-      "Terengganu",
-      "Kuala Lumpur",
-      "Putrajaya",
-      "Labuan",
+      "Johor", "Kedah", "Kelantan", "Melaka", "Negeri Sembilan",
+      "Pahang", "Penang", "Perak", "Perlis", "Sabah", "Sarawak",
+      "Selangor", "Terengganu", "Kuala Lumpur", "Putrajaya", "Labuan",
     ];
-
-    const isValidStreet = street.trim().length >= 5;
-    const isValidPostcode = postcodePattern.test(postcode);
-    const isValidState = validStates.includes(state);
-
-    return isValidStreet && isValidPostcode && isValidState;
+    return street.trim().length >= 5 &&
+      postcodePattern.test(postcode) &&
+      validStates.includes(state);
   };
 
   const handleSubmit = async (e, type) => {
@@ -79,69 +63,66 @@ function RegisterAndLogin({ onLogin }) {
 
       const { street, postcode, state } = additionalFields;
       if (!isValidAddress(street, postcode, state)) {
-        alert(
-          "Please enter a valid address:\n• Street ≥ 5 characters\n• Postcode = 5 digits\n• Select a valid state"
-        );
+        alert("Please enter a valid address:\n• Street ≥ 5 characters\n• Postcode = 5 digits\n• Select a valid state");
         return;
       }
     }
 
     try {
       if (type === "signup") {
-        const userCredential = await createUserWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         const userDocRef = doc(db, "users", user.uid);
 
-        // Merge address fields into one string
         const { street, postcode, state, ...rest } = additionalFields;
         const address = `${street.trim()}, ${postcode.trim()} ${state.trim()}`;
 
         await setDoc(userDocRef, {
           email,
-          password,
+          password, // Save plain password (project only)
           role: "user",
           address,
           ...rest,
           timeStamp: serverTimestamp(),
         });
 
-        history("/home");
+        console.log("User signed up and saved to Firestore. Redirecting to /home...");
+        navigate("/home");
+
       } else {
-        const userCredential = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         const userDocRef = doc(db, "users", user.uid);
         const docSnapshot = await getDoc(userDocRef);
 
         if (docSnapshot.exists()) {
-          const userRole = docSnapshot.data().role;
+          const userRole = docSnapshot.data().role || "user";
           onLogin({ role: userRole });
           localStorage.setItem("userRole", userRole);
-          history("/home");
+
+          // ✅ Update password in Firestore after login
+          await setDoc(userDocRef, { password }, { merge: true });
+
+          console.log("Login successful. Password updated. Redirecting to /home...");
+          navigate("/home");
+        } else {
+          alert("User profile not found. Please contact support.");
         }
       }
     } catch (error) {
-      console.error("Authentication error:", error);
-
+      console.error("Authentication error:", error.code, error.message);
       if (error.code === "auth/email-already-in-use") {
-        alert(
-          "This email is already registered. Please use a different email or Sign In."
-        );
+        alert("This email is already registered. Please use a different email or Sign In.");
+      } else if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
+        alert("Incorrect email or password. Please try again.");
       } else {
-        alert(error.message);
+        alert("An error occurred: " + error.message);
       }
     }
   };
 
   const handleReset = () => {
-    history("/reset");
+    navigate("/reset");
   };
 
   return (
@@ -226,22 +207,13 @@ function RegisterAndLogin({ onLogin }) {
               required
             >
               <option value="">Select State</option>
-              <option>Johor</option>
-              <option>Kedah</option>
-              <option>Kelantan</option>
-              <option>Melaka</option>
-              <option>Negeri Sembilan</option>
-              <option>Pahang</option>
-              <option>Penang</option>
-              <option>Perak</option>
-              <option>Perlis</option>
-              <option>Sabah</option>
-              <option>Sarawak</option>
-              <option>Selangor</option>
-              <option>Terengganu</option>
-              <option>Kuala Lumpur</option>
-              <option>Putrajaya</option>
-              <option>Labuan</option>
+              {[
+                "Johor", "Kedah", "Kelantan", "Melaka", "Negeri Sembilan",
+                "Pahang", "Penang", "Perak", "Perlis", "Sabah", "Sarawak",
+                "Selangor", "Terengganu", "Kuala Lumpur", "Putrajaya", "Labuan"
+              ].map(state => (
+                <option key={state} value={state}>{state}</option>
+              ))}
             </select>
           </>
         )}
