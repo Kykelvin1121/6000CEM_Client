@@ -1,27 +1,35 @@
 import React, { useEffect, useState } from "react";
-import { getAuth } from 'firebase/auth';
-import { db } from '../../FirebaseConfig';
-import { collection, onSnapshot } from 'firebase/firestore';
-import './TrackOrder.css';
+import { getAuth } from "firebase/auth";
+import { db } from "../../FirebaseConfig";
+import { collection, onSnapshot } from "firebase/firestore";
+import "./TrackOrder.css";
 
 const TrackOrder = () => {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
     window.scrollTo(0, 1);
-    const trackOrders = onSnapshot(collection(db, 'orders'), (snapshot) => {
+
+    const unsubscribe = onSnapshot(collection(db, "orders"), (snapshot) => {
       let orders = [];
       snapshot.forEach((orderDoc) => {
         const order = orderDoc.data();
-        if (order.userId === getAuth().currentUser.uid) {
+        if (order.userId === getAuth().currentUser?.uid) {
           orders.push({ orderId: orderDoc.id, ...order });
         }
       });
+
+      // Sort orders by timestamp descending (latest first)
+      orders.sort((a, b) => {
+        const timeA = a.timeStamp?.toDate ? a.timeStamp.toDate().getTime() : 0;
+        const timeB = b.timeStamp?.toDate ? b.timeStamp.toDate().getTime() : 0;
+        return timeB - timeA;
+      });
+
       setOrders(orders);
     });
-    return () => {
-      trackOrders();
-    };
+
+    return () => unsubscribe();
   }, []);
 
   function getStatusColor(status) {
@@ -35,7 +43,26 @@ const TrackOrder = () => {
       default:
         return "";
     }
-  }  
+  }
+
+  function formatTimestamp(timestamp) {
+    if (!timestamp || !timestamp.toDate) return "N/A";
+    const dateObj = timestamp.toDate();
+    const options = {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    };
+    return dateObj.toLocaleString("en-MY", options);
+  }
+
+  function getTotalItems(products) {
+    if (!products || products.length === 0) return 0;
+    return products.reduce((total, product) => total + (product.qty || 1), 0);
+  }
 
   return (
     <div className="track-order-container">
@@ -46,20 +73,43 @@ const TrackOrder = () => {
             <div key={order.orderId} className="order-item">
               <div className="order-header">
                 <h2 className="order-id">Order ID: {order.orderId}</h2>
-                <h3 className={`${getStatusColor(order.status)}`}>Order Status: {order.status}</h3>
+                <div className="order-status-group">
+                  <h3 className={`${getStatusColor(order.status)}`}>
+                    Order Status: {order.status}
+                  </h3>
+                  <p className="order-timestamp">
+                    Placed On: {formatTimestamp(order.timeStamp)}
+                  </p>
+                </div>
               </div>
+
               <div className="order-details">
-                <h4 className="total-price">Total Price: RM{order.totalPrice}.00</h4>
-                <h5 className="product-title">Product Items</h5>
                 <ul className="ordered-products-list">
                   {order.products.map((product) => (
                     <li key={product.id} className="product-item">
-                      <img src={product.img} alt={product.title} className="product-image" />
+                      <img
+                        src={product.img}
+                        alt={product.title}
+                        className="product-image"
+                      />
                       <p className="product-name">{product.title}</p>
-                      <p className="product-quantity">Quantity: {product.qty}</p>
+                      {/* Quantity removed as requested */}
                     </li>
                   ))}
                 </ul>
+
+                <h4 className="total-price">
+                  Total {getTotalItems(order.products)} item
+                  {getTotalItems(order.products) > 1 ? "s" : ""} : RM
+                  {order.totalPrice}.00
+                </h4>
+
+                <hr className="separator-line" />
+
+                <h5 className="shipping-address-title">Shipping Address</h5>
+                <p className="shipping-address">
+                  {order.shippingAddress || "No shipping address provided"}
+                </p>
               </div>
             </div>
           ))

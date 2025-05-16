@@ -1,14 +1,13 @@
-/* TrackOrder.css */
 .track-order-container {
-    border-radius: 8px;
-    width: 800px;
-    margin: 0 auto;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding-top: 150px;
-    min-height: 100vh;
-  }
+  border-radius: 8px;
+  width: 800px;
+  margin: 0 auto;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 150px;
+  min-height: 100vh;
+}
 
 .track-order-title {
   font-size: 28px;
@@ -34,7 +33,7 @@
 .order-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 10px;
 }
 
@@ -43,18 +42,30 @@
   color: #333;
 }
 
+/* Group to stack status and timestamp vertically */
+.order-status-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
 .blue-color {
-    color: rgb(0, 123, 255);
-  }
-  
-  .yellow-color {
-    color: rgb(255, 123, 0);
-  }
-  
-  .green-color {
-    color: rgb(3, 230, 3)
-  }
-  
+  color: rgb(0, 123, 255);
+}
+
+.yellow-color {
+  color: rgb(255, 123, 0);
+}
+
+.green-color {
+  color: rgb(3, 230, 3);
+}
+
+.order-timestamp {
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 4px;
+}
 
 .order-details {
   display: flex;
@@ -67,43 +78,49 @@
   margin-top: 10px;
 }
 
-.ordered-products-list {
-  list-style: none;
-  padding: 0;
+.product-title {
+  font-size: 20px;
+  font-weight: 500;
+  color: #333;
+  padding-left: 30px;
+  padding-top: 20px;
+  margin-bottom: -5px;
 }
+
+.ordered-products-list {
+  padding: 0;
+  margin-top: 8px; 
+  margin-bottom: 0; 
+} 
 
 .product-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #e0e0e0;
-  padding-top: 20px;
+  gap: 12px;
+  margin-bottom: 10px;
+  padding-top: 4px; 
+}
+
+.product-name {
+  font-size: 18px;
+  color: #333;
+  padding-left: 30px;
+  margin-bottom: 0; 
+}
+
+
+.product-image {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
 }
 
 .product-quantity {
   font-size: 18px;
-  color: #333;
-  padding-right: 350px;
-}
-
-.product-title{
-    font-size: 20px;
-    font-weight: 500;
-    color: #333;
-    padding-left: 30px;
-    padding-top: 20px;
-    margin-bottom: -5px;
-}
-
-.product-name{
-    font-size: 18px;
-    color: #333;
-    padding-left: 30px;
-}
-
-.product-quantity {
-    font-weight: 500;
+  font-weight: 500;
   color: rgb(0, 123, 255);
+  padding-right: 350px;
 }
 
 .no-orders {
@@ -112,16 +129,9 @@
   text-align: center;
   color: #888;
 }
-.product-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
-}
 
-.product-image {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 6px;
+.shipping-address {
+  font-size: 16px;
+  color: #444;
+  margin-top: 8px;
 }
