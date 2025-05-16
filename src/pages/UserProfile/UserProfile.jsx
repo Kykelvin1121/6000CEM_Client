@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { db, auth } from "../../FirebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { toast } from "react-toastify";         // <-- import toast
+import 'react-toastify/dist/ReactToastify.css'; // <-- import toast styles
 import './UserProfile.css';
 
 const validStates = [
@@ -17,6 +19,30 @@ const isValidAddress = (street, postcode, state) => {
   return isValidStreet && isValidPostcode && isValidState;
 };
 
+const parseAddress = (addressString) => {
+  if (!addressString) return { street: "", postcode: "", state: "" };
+  
+  const parts = addressString.split(",").map(part => part.trim());
+  
+  if (parts.length >= 3) {
+    return {
+      street: parts.slice(0, parts.length - 2).join(", "),
+      postcode: parts[parts.length - 2],
+      state: parts[parts.length - 1],
+    };
+  } else {
+    return {
+      street: parts[0] || "",
+      postcode: parts[1] || "",
+      state: parts[2] || ""
+    };
+  }
+};
+
+const combineAddress = (street, postcode, state) => {
+  return `${street.trim()}, ${postcode.trim()}, ${state.trim()}`;
+};
+
 const UserProfile = () => {
   const [userProfile, setUserProfile] = useState({
     email: "",
@@ -24,64 +50,38 @@ const UserProfile = () => {
     phoneNumber: "",
   });
 
-  // Separate address fields for form
   const [street, setStreet] = useState("");
   const [postcode, setPostcode] = useState("");
   const [state, setState] = useState("");
 
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-
-  // Parse address string to separate fields
-  const parseAddress = (addressString) => {
-    if (!addressString) return { street: "", postcode: "", state: "" };
-    const parts = addressString.split(",").map(part => part.trim());
-    // Assume format: "street, postcode, state"
-    return {
-      street: parts[0] || "",
-      postcode: parts[1] || "",
-      state: parts[2] || ""
-    };
-  };
-
-  // Combine address fields to single string
-  const combineAddress = (street, postcode, state) => {
-    return `${street.trim()}, ${postcode.trim()}, ${state.trim()}`;
-  };
-
-  // Fetch user profile from Firestore
-  const fetchUserProfile = async () => {
-    const user = auth.currentUser;
-    if (user) {
-      const userDocRef = doc(db, "users", user.uid);
-      const docSnapshot = await getDoc(userDocRef);
-      if (docSnapshot.exists()) {
-        const data = docSnapshot.data();
-        setUserProfile({
-          email: data.email || user.email || "",
-          username: data.username || "",
-          phoneNumber: data.phoneNumber || "",
-        });
-
-        const { street, postcode, state } = parseAddress(data.address || "");
-        setStreet(street);
-        setPostcode(postcode);
-        setState(state);
-      }
-    }
-  };
-
   useEffect(() => {
     window.scrollTo(0, 1);
+    const fetchUserProfile = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const docSnapshot = await getDoc(userDocRef);
+        if (docSnapshot.exists()) {
+          const data = docSnapshot.data();
+          setUserProfile({
+            email: data.email || user.email || "",
+            username: data.username || "",
+            phoneNumber: data.phoneNumber || "",
+          });
+
+          const { street, postcode, state } = parseAddress(data.address || "");
+          setStreet(street);
+          setPostcode(postcode);
+          setState(state);
+        }
+      }
+    };
     fetchUserProfile();
   }, []);
 
   const handleProfileUpdate = async () => {
-    setErrorMessage("");
-    setSuccessMessage("");
-
     if (!isValidAddress(street, postcode, state)) {
-      setErrorMessage(
+      toast.error(
         "Invalid address. Ensure street ≥ 5 characters, postcode = 5 digits, and state is selected."
       );
       return;
@@ -89,7 +89,7 @@ const UserProfile = () => {
 
     const user = auth.currentUser;
     if (!user) {
-      setErrorMessage("No authenticated user.");
+      toast.error("No authenticated user.");
       return;
     }
 
@@ -102,23 +102,18 @@ const UserProfile = () => {
         address: combinedAddress,
       });
 
-      setSuccessMessage("Profile updated successfully!");
-      setTimeout(() => {
-        setSuccessMessage("");
-        setErrorMessage("");
-      }, 3000);
+      toast.success("Profile updated successfully!");
     } catch (error) {
-      console.error("Error updating user profile:", error);
-      setErrorMessage(error.message || "Failed to update profile.");
+      toast.error(error.message || "Failed to update profile.");
     }
   };
 
   return (
     <div className="profile-container">
-      <h1>User Profile</h1>
+      {/* ToastContainer can be here or preferably in your app root */}
+      {/* <ToastContainer /> */}
 
-      {successMessage && <div className="success-message">{successMessage}</div>}
-      {errorMessage && <div className="error-message">{errorMessage}</div>}
+      <h1>User Profile</h1>
 
       <div className="profile-form">
         <div className="form-group">
@@ -159,8 +154,6 @@ const UserProfile = () => {
             }
           />
         </div>
-
-        {/* Address fields broken down */}
 
         <div className="form-group">
           <label htmlFor="street">Street Address:</label>
