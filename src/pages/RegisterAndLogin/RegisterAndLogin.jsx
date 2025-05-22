@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import logoImage from "../../Images/Ecom.png";
 import "./RegisterAndLogin.css";
 import "../../index.css";
+import bcrypt from "bcryptjs"; // ✅ Password hashing library
 
 function RegisterAndLogin({ onLogin }) {
   const [login, setLogin] = useState(false);
@@ -74,12 +75,14 @@ function RegisterAndLogin({ onLogin }) {
         const user = userCredential.user;
         const userDocRef = doc(db, "users", user.uid);
 
+        const hashedPassword = await bcrypt.hash(password, 10); // ✅ hash password
+
         const { street, postcode, state, ...rest } = additionalFields;
         const address = `${street.trim()}, ${postcode.trim()} ${state.trim()}`;
 
         await setDoc(userDocRef, {
           email,
-          password, // Save plain password (project only)
+          password: hashedPassword, // ✅ store hashed password
           role: "user",
           address,
           ...rest,
@@ -100,10 +103,8 @@ function RegisterAndLogin({ onLogin }) {
           onLogin({ role: userRole });
           localStorage.setItem("userRole", userRole);
 
-          // ✅ Update password in Firestore after login
-          await setDoc(userDocRef, { password }, { merge: true });
-
-          console.log("Login successful. Password updated. Redirecting to /home...");
+          // ✅ DO NOT re-save password — Firebase Auth already verified it
+          console.log("Login successful. Redirecting to /home...");
           navigate("/home");
         } else {
           alert("User profile not found. Please contact support.");
