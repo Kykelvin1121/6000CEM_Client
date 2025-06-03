@@ -114,7 +114,7 @@ function RegisterAndLogin({ onLogin }) {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const { street, postcode, state, ...rest } = additionalFields;
-        const address = `${street.trim()}, ${postcode.trim()} ${state.trim()}`;
+        const address = `${street.trim()}, ${postcode.trim()}, ${state.trim()}`;
 
         await setDoc(userDocRef, {
           email,
