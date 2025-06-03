@@ -14,10 +14,12 @@ import { useNavigate } from "react-router-dom";
 import logoImage from "../../Images/Ecom.png";
 import "./RegisterAndLogin.css";
 import "../../index.css";
-import bcrypt from "bcryptjs"; // ✅ Password hashing library
+import bcrypt from "bcryptjs";
 
 function RegisterAndLogin({ onLogin }) {
   const [login, setLogin] = useState(false);
+  const [email, setEmail] = useState("");
+  const [emailWarning, setEmailWarning] = useState("");
   const [additionalFields, setAdditionalFields] = useState({
     username: "",
     phoneNumber: "",
@@ -27,6 +29,28 @@ function RegisterAndLogin({ onLogin }) {
   });
 
   const navigate = useNavigate();
+
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+  };
+
+  const handleEmailBlur = () => {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailPattern.test(email)) {
+      setEmailWarning("Invalid email format.");
+      return;
+    }
+
+    if (email.endsWith(".con")) {
+      const corrected = email.replace(/\.con$/, ".com");
+      setEmail(corrected);
+      setEmailWarning("Did you mean '.com'? Auto-corrected.");
+      return;
+    }
+
+    setEmailWarning("");
+  };
 
   const handleAdditionalFieldChange = (e) => {
     const { name, value } = e.target;
@@ -47,9 +71,21 @@ function RegisterAndLogin({ onLogin }) {
 
   const handleSubmit = async (e, type) => {
     e.preventDefault();
-    const email = e.target.email.value;
     const password = e.target.password.value;
 
+    // ✅ Validate email first
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      alert("Please enter a valid email.");
+      return;
+    }
+
+    if (email.endsWith(".con")) {
+      alert("Email ends with '.con'. Did you mean '.com'?");
+      return;
+    }
+
+    // ✅ Validate password and address after email is valid
     if (password.length < 6) {
       alert("Password must be at least 6 characters.");
       return;
@@ -64,7 +100,7 @@ function RegisterAndLogin({ onLogin }) {
 
       const { street, postcode, state } = additionalFields;
       if (!isValidAddress(street, postcode, state)) {
-        alert("Please enter a valid address:\n• Street ≥ 5 characters\n• Postcode = 5 digits\n• Select a valid state");
+        alert("Please enter a valid address:\n• Street ≥ 5 characters\n• Postcode = 5 digits\n• Valid state selected.");
         return;
       }
     }
@@ -75,23 +111,22 @@ function RegisterAndLogin({ onLogin }) {
         const user = userCredential.user;
         const userDocRef = doc(db, "users", user.uid);
 
-        const hashedPassword = await bcrypt.hash(password, 10); // ✅ hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         const { street, postcode, state, ...rest } = additionalFields;
         const address = `${street.trim()}, ${postcode.trim()} ${state.trim()}`;
 
         await setDoc(userDocRef, {
           email,
-          password: hashedPassword, // ✅ store hashed password
+          password: hashedPassword,
           role: "user",
           address,
           ...rest,
           timeStamp: serverTimestamp(),
         });
 
-        console.log("User signed up and saved to Firestore. Redirecting to /home...");
+        console.log("User signed up and saved. Redirecting to /home...");
         navigate("/home");
-
       } else {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
@@ -102,8 +137,6 @@ function RegisterAndLogin({ onLogin }) {
           const userRole = docSnapshot.data().role || "user";
           onLogin({ role: userRole });
           localStorage.setItem("userRole", userRole);
-
-          // ✅ DO NOT re-save password — Firebase Auth already verified it
           console.log("Login successful. Redirecting to /home...");
           navigate("/home");
         } else {
@@ -115,7 +148,7 @@ function RegisterAndLogin({ onLogin }) {
       if (error.code === "auth/email-already-in-use") {
         alert("This email is already registered. Please use a different email or Sign In.");
       } else if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
-        alert("Incorrect email or password. Please try again.");
+        alert("Incorrect email or password.");
       } else {
         alert("An error occurred: " + error.message);
       }
@@ -157,7 +190,14 @@ function RegisterAndLogin({ onLogin }) {
           placeholder="Email"
           required
           type="email"
+          value={email}
+          onChange={handleEmailChange}
+          onBlur={handleEmailBlur}
         />
+        {emailWarning && (
+          <p style={{ color: "orange", fontSize: "0.9rem" }}>{emailWarning}</p>
+        )}
+
         <input
           className="form-input"
           name="password"

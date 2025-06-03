@@ -6,7 +6,7 @@ import watchSlide from "../Images/watch-07.png";
 export const SliderData = [
   {
     id: 1,
-    title: "Welcome to Our Online Store",
+    title: "Welcome to E-Tech Hub Online Store",
     desc: "Discover a wide range of products.",
     cover: sofaSlide,
   },
@@ -19,7 +19,7 @@ export const SliderData = [
   {
     id: 3,
     title: "Explore Our Collection",
-    desc: "From sofa to bed, we've got it all.",
+    desc: "From Phones to buds, we've got it all.",
     cover: wireless01Slide,
   },
   {

@@ -4,8 +4,9 @@ import "./navbar.css";
 import logoImage from "../../Images/Ecom.png";
 import { DataContainer } from "../../App";
 import { Link, useNavigate } from "react-router-dom";
-import { signOut } from "firebase/auth";
-import { auth } from "../../FirebaseConfig";
+import { signOut, onAuthStateChanged } from "firebase/auth";
+import { auth, db } from "../../FirebaseConfig"; // Make sure 'db' is Firestore instance
+import { doc, getDoc } from "firebase/firestore";
 
 const NavBar = () => {
   const { CartItem, setCartItem } = useContext(DataContainer);
@@ -13,9 +14,11 @@ const NavBar = () => {
   const history = useNavigate();
   const [userRole, setUserRole] = useState(null);
   const [hoveringProfile, setHoveringProfile] = useState(false);
+  const [userName, setUserName] = useState(""); // username from Firestore
 
   const handleSignOut = () => {
     localStorage.removeItem("userRole");
+    localStorage.removeItem("userName");
     signOut(auth).then(() => {
       history("/");
     });
@@ -38,6 +41,32 @@ const NavBar = () => {
     if (storedUserRole) {
       setUserRole(storedUserRole);
     }
+
+    // Listen for Firebase Auth state change
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // Fetch user document from Firestore
+        try {
+          const userDocRef = doc(db, "users", user.uid); // adjust "users" collection if different
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            setUserName(userData.username || "User"); // your firestore field is 'username'
+            localStorage.setItem("userName", userData.username || "User");
+          } else {
+            setUserName("User");
+          }
+        } catch (error) {
+          console.error("Error fetching username:", error);
+          setUserName("User");
+        }
+      } else {
+        setUserName("");
+        localStorage.removeItem("userName");
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -57,31 +86,45 @@ const NavBar = () => {
           <Nav className="justify-content-end flex-grow-1 pe-3">
             <Nav.Item>
               <Link className="navbar-link" to="/home">
-                <span className="nav-link-label">Home</span>
+                <div className="icon-container" title="Home">
+                  <i className="fas fa-home nav-icon"></i>
+                </div>
               </Link>
             </Nav.Item>
 
             <Nav.Item>
               <Link className="navbar-link" to="/shop">
-                <span className="nav-link-label">Shop</span>
+                <div className="icon-container" title="Shop">
+                  <i className="fas fa-store nav-icon"></i>
+                </div>
               </Link>
             </Nav.Item>
 
             <Nav.Item className="expanded-cart" style={{ position: "relative", display: "flex", gap: "10px" }}>
-              {/* Profile Icon and Dropdown */}
+              {/* Cart Icon FIRST */}
+              <Link to="/cart" className="cart" data-num={CartItem.length}>
+                <div className="icon-container" title="Cart">
+                  <i className="fas fa-shopping-cart nav-icon"></i>
+                </div>
+              </Link>
+
+              {/* Profile Icon and Username NEXT */}
               <div
                 onMouseEnter={() => setHoveringProfile(true)}
                 onMouseLeave={() => setHoveringProfile(false)}
-                style={{ position: "relative" }}
+                style={{ position: "relative", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
+                title="Profile"
               >
                 <div className="icon-container">
                   <i className="fas fa-user nav-icon"></i>
                 </div>
+                <span style={{ color: "#0077FF", fontWeight: "600", fontSize: "16px", userSelect: "none" }}>
+                  {userName || "Guest"}
+                </span>
 
                 {hoveringProfile && (
                   <div className="dropDownProfile">
                     <ul className="dropDownContent">
-                      {/* Conditionally show Admin link */}
                       {(userRole === "admin" || userRole === "super_admin") && (
                         <li>
                           <a
@@ -123,13 +166,6 @@ const NavBar = () => {
                   </div>
                 )}
               </div>
-
-              {/* Cart Icon */}
-              <Link to="/cart" className="cart" data-num={CartItem.length}>
-                <div className="icon-container">
-                  <i className="fas fa-shopping-cart nav-icon"></i>
-                </div>
-              </Link>
             </Nav.Item>
           </Nav>
         </Navbar.Collapse>
