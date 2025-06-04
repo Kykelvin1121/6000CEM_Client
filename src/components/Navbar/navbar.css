@@ -75,7 +75,10 @@
   position: relative;
   text-decoration: none;
 }
-
+.cart:hover .nav-icon {
+  color: #0F5A92;
+  transform: scale(1.1);
+}
 .cart::before {
   content: attr(data-num);
   position: absolute;
@@ -97,7 +100,7 @@
 .dropDownProfile {
   position: absolute;
   top: 100%;
-  right: 0;
+  right: 30px;
   width: 140px;
   padding: 15px 10px 10px 10px;
   background: white;
@@ -133,32 +136,63 @@
   color: black;
   font-size: 16px;
   font-weight: 500;
+  background-color: transparent;
+
 }
 
 .dropDown:hover {
-  color: #167AC0;
+  color: #0077FF;
 }
 
-/* Added: Username beside user icon */
-.icon-container span {
-  color: #0077FF;        /* match nav-icon color */
+/* Username text beside icon */
+.username-text {
+  color: #0077FF;
   font-weight: 600;
   font-size: 16px;
-  white-space: nowrap;   /* prevent wrapping */
-  user-select: none;     /* optional: prevent text selection */
+  user-select: none;
+  white-space: nowrap;
 }
 
-/* Added: Expanded cart container alignment */
+/* Cart & Profile wrapper */
 .expanded-cart {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 25px;
 }
 
-/* Added: Profile icon + username container cursor & layout */
-.expanded-cart > div[title="Profile"] {
+/* Profile hover container */
+.profile-hover-container {
+  position: relative;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+}
+.profile-hover-container:hover .nav-icon {
+  color: #0F5A92;
+  transform: scale(1.1);
+}
+/* Sign-out button reset */
+.dropDownButton {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;         
+  text-decoration: none; 
+  width: 100%;           
+  text-align: left;  
+  outline: none;
+  background-color: transparent;
+  box-shadow: none;   
+}
+
+/* Icon container for color and sizing */
+.icon-container {
+  color: #0077FF;
+  font-weight: 600;
+  font-size: 16px;
+  user-select: none;
 }

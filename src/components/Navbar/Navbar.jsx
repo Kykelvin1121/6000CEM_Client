@@ -5,7 +5,7 @@ import logoImage from "../../Images/Ecom.png";
 import { DataContainer } from "../../App";
 import { Link, useNavigate } from "react-router-dom";
 import { signOut, onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "../../FirebaseConfig"; // Make sure 'db' is Firestore instance
+import { auth, db } from "../../FirebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
 
 const NavBar = () => {
@@ -14,7 +14,7 @@ const NavBar = () => {
   const history = useNavigate();
   const [userRole, setUserRole] = useState(null);
   const [hoveringProfile, setHoveringProfile] = useState(false);
-  const [userName, setUserName] = useState(""); // username from Firestore
+  const [userName, setUserName] = useState("");
 
   const handleSignOut = () => {
     localStorage.removeItem("userRole");
@@ -30,7 +30,6 @@ const NavBar = () => {
     };
 
     window.addEventListener("scroll", scrollHandler);
-
     return () => {
       window.removeEventListener("scroll", scrollHandler);
     };
@@ -42,16 +41,14 @@ const NavBar = () => {
       setUserRole(storedUserRole);
     }
 
-    // Listen for Firebase Auth state change
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Fetch user document from Firestore
         try {
-          const userDocRef = doc(db, "users", user.uid); // adjust "users" collection if different
+          const userDocRef = doc(db, "users", user.uid);
           const userDocSnap = await getDoc(userDocRef);
           if (userDocSnap.exists()) {
             const userData = userDocSnap.data();
-            setUserName(userData.username || "User"); // your firestore field is 'username'
+            setUserName(userData.username || "User");
             localStorage.setItem("userName", userData.username || "User");
           } else {
             setUserName("User");
@@ -85,42 +82,38 @@ const NavBar = () => {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="justify-content-end flex-grow-1 pe-3">
             <Nav.Item>
-              <Link className="navbar-link" to="/home">
-                <div className="icon-container" title="Home">
+              <Link className="navbar-link" to="/home" title="Home">
+                <div className="icon-container">
                   <i className="fas fa-home nav-icon"></i>
                 </div>
               </Link>
             </Nav.Item>
 
             <Nav.Item>
-              <Link className="navbar-link" to="/shop">
-                <div className="icon-container" title="Shop">
+              <Link className="navbar-link" to="/shop" title="Shop">
+                <div className="icon-container">
                   <i className="fas fa-store nav-icon"></i>
                 </div>
               </Link>
             </Nav.Item>
 
-            <Nav.Item className="expanded-cart" style={{ position: "relative", display: "flex", gap: "10px" }}>
-              {/* Cart Icon FIRST */}
-              <Link to="/cart" className="cart" data-num={CartItem.length}>
-                <div className="icon-container" title="Cart">
+            <Nav.Item className="expanded-cart">
+              <Link to="/cart" className="cart" data-num={CartItem.length} title="Cart">
+                <div className="icon-container">
                   <i className="fas fa-shopping-cart nav-icon"></i>
                 </div>
               </Link>
 
-              {/* Profile Icon and Username NEXT */}
               <div
+                className="profile-hover-container"
                 onMouseEnter={() => setHoveringProfile(true)}
                 onMouseLeave={() => setHoveringProfile(false)}
-                style={{ position: "relative", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
                 title="Profile"
               >
                 <div className="icon-container">
                   <i className="fas fa-user nav-icon"></i>
                 </div>
-                <span style={{ color: "#0077FF", fontWeight: "600", fontSize: "16px", userSelect: "none" }}>
-                  {userName || "Guest"}
-                </span>
+                <span className="username-text">{userName || "Welcome Guest"}</span>
 
                 {hoveringProfile && (
                   <div className="dropDownProfile">
@@ -148,17 +141,7 @@ const NavBar = () => {
                         </Link>
                       </li>
                       <li>
-                        <button
-                          onClick={handleSignOut}
-                          className="dropDown"
-                          style={{
-                            background: "none",
-                            border: "none",
-                            padding: 0,
-                            color: "inherit",
-                            cursor: "pointer",
-                          }}
-                        >
+                        <button onClick={handleSignOut} className="dropDown">
                           Sign Out
                         </button>
                       </li>
