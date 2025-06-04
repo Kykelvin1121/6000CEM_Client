@@ -49,17 +49,18 @@ const Product = ({ addToCart }) => {
   return (
     <Row className="justify-content-center">
       {productData
-        .filter(
-          (product) =>
-            (product.wh1qty || 0) + (product.wh2qty || 0) + (product.wh3qty || 0) > 0
-        )
+        .filter((product) => {
+          const totalQty = (product.wh1qty || 0) + (product.wh2qty || 0) + (product.wh3qty || 0);
+          // Only show products with stock AND status not disabled
+          return totalQty > 0 && product.status !== "disabled";
+        })
         .map((product) => (
           <div key={product.id} className="product mtop">
             <img
               loading="lazy"
               onClick={() => handleProductClick(product)}
               src={product.img}
-              alt=""
+              alt={product.title}
             />
             <div className="product-details">
               <h3 onClick={() => handleProductClick(product)}>
