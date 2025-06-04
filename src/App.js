@@ -6,6 +6,7 @@ import Footer from "./components/Footer/Footer";
 import Loader from "./components/Loader/Loader";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { getAuth } from "firebase/auth";
 
 const Home = lazy(() => import("./pages/Home/Home"));
 const Shop = lazy(() => import("./pages/Shop/Shop"));
@@ -24,37 +25,95 @@ function App() {
   const [userRole, setUserRole] = useState(null);
 
   const addToCart = (product, num = 1) => {
-    const productExist = CartItem.find((item) => item.id === product.id);
-    if (productExist) {
-      setCartItem(CartItem.map((item) => (item.id === product.id ? { ...productExist, qty: productExist.qty + num } : item)));
-    } else {
-      setCartItem([...CartItem, { ...product, qty: num }]);
+    const user = getAuth().currentUser;
+    if (!user) {
+      console.error("User not logged in");
+      return;
     }
-  }
+    const userId = user.uid;
+
+    const productExist = CartItem.find(
+      (item) => item.id === product.id && item.userId === userId
+    );
+
+    let updatedCart;
+    if (productExist) {
+      updatedCart = CartItem.map((item) =>
+        item.id === product.id && item.userId === userId
+          ? { ...productExist, qty: productExist.qty + num }
+          : item
+      );
+    } else {
+      updatedCart = [...CartItem, { ...product, qty: num, userId }];
+    }
+
+    setCartItem(updatedCart);
+    localStorage.setItem("cartItem", JSON.stringify(updatedCart));
+  };
 
   const decreaseQty = (product) => {
-    const productExist = CartItem.find((item) => item.id === product.id);
-    if (productExist.qty === 1) {
-      setCartItem(CartItem.filter((item) => item.id !== product.id));
-    } else {
-      setCartItem(CartItem.map((item) => (item.id === product.id ? { ...productExist, qty: productExist.qty - 1 } : item)));
-    }
-  }
+    const user = getAuth().currentUser;
+    if (!user) return;
+
+    const productExist = CartItem.find(
+      (item) => item.id === product.id && item.userId === user.uid
+    );
+    if (!productExist) return;
+
+    const updatedCart =
+      productExist.qty === 1
+        ? CartItem.filter((item) => !(item.id === product.id && item.userId === user.uid))
+        : CartItem.map((item) =>
+            item.id === product.id && item.userId === user.uid
+              ? { ...productExist, qty: productExist.qty - 1 }
+              : item
+          );
+
+    setCartItem(updatedCart);
+    localStorage.setItem("cartItem", JSON.stringify(updatedCart));
+  };
 
   const deleteProduct = (product) => {
-    setCartItem(CartItem.filter((item) => item.id !== product.id));
-  }
+    const user = getAuth().currentUser;
+    if (!user) return;
+
+    const updatedCart = CartItem.filter(
+      (item) => !(item.id === product.id && item.userId === user.uid)
+    );
+    setCartItem(updatedCart);
+    localStorage.setItem("cartItem", JSON.stringify(updatedCart));
+  };
 
   useEffect(() => {
-    localStorage.setItem("cartItem", JSON.stringify(CartItem));
-  }, [CartItem]);
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) return;
+
+    const storedCart = localStorage.getItem("cartItem");
+    if (storedCart) {
+      const parsedCart = JSON.parse(storedCart);
+      const userCart = parsedCart.filter((item) => item.userId === user.uid);
+      setCartItem(userCart);
+    }
+  }, []);
 
   const handleLogin = (userData) => {
     setUserRole(userData.role);
-  }
+  };
 
   return (
-    <DataContainer.Provider value={{ CartItem, setCartItem, addToCart, decreaseQty, deleteProduct, selectedProduct, setSelectedProduct }}>
+    <DataContainer.Provider
+      value={{
+        CartItem,
+        setCartItem,
+        addToCart,
+        decreaseQty,
+        deleteProduct,
+        selectedProduct,
+        setSelectedProduct,
+      }}
+    >
       <Suspense fallback={<Loader />}>
         <Router>
           <ToastContainer
@@ -69,7 +128,7 @@ function App() {
             theme="light"
           />
           <Routes>
-            <Route path="/" element={<RegisterAndLogin onLogin={handleLogin}/>} />
+            <Route path="/" element={<RegisterAndLogin onLogin={handleLogin} />} />
             <Route path="/reset" element={<ForgotPassword />} />
             <Route
               path="/"

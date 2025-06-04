@@ -26,7 +26,7 @@ const Cart = () => {
   const [userAddress, setUserAddress] = useState("");
   const history = useNavigate();
 
-  // Get current user's address from Firestore
+  // Fetch user address
   useEffect(() => {
     const fetchUserAddress = async () => {
       const user = getAuth().currentUser;
@@ -62,7 +62,7 @@ const Cart = () => {
 
       if (productSnapshot.exists()) {
         const productData = productSnapshot.data();
-        const warehouseKey = `wh1qty`; // or modify this logic if needed
+        const warehouseKey = `wh1qty`;
 
         if (productData[warehouseKey] < item.qty) {
           hasSufficientQuantity = false;
@@ -110,9 +110,16 @@ const Cart = () => {
 
   useEffect(() => {
     window.scrollTo(0, 1);
-    if (CartItem.length === 0) {
+    const user = getAuth().currentUser;
+    if (CartItem.length === 0 && user) {
       const storedCart = localStorage.getItem("cartItem");
-      if (storedCart) setCartItem(JSON.parse(storedCart));
+      if (storedCart) {
+        const parsedCart = JSON.parse(storedCart);
+        const userCart = parsedCart.filter(
+          (item) => item.userId === user.uid
+        );
+        setCartItem(userCart);
+      }
     }
   }, []);
 
