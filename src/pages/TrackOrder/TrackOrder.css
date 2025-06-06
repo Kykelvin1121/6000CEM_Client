@@ -108,7 +108,6 @@
   margin-bottom: 0; 
 }
 
-
 .product-image {
   width: 60px;
   height: 60px;
@@ -120,7 +119,7 @@
   font-size: 18px;
   font-weight: 500;
   color: rgb(0, 123, 255);
-  padding-right: 350px;
+  margin-left: auto;
 }
 
 .no-orders {
@@ -130,8 +129,25 @@
   color: #888;
 }
 
-.shipping-address {
+/* Delivery Information Section */
+
+.delivery-info-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #222;
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+
+.delivery-address {
   font-size: 16px;
   color: #444;
-  margin-top: 8px;
+  margin-bottom: 5px;
+  padding-left: 10px;
+}
+
+.delivery-username {
+  font-size: 16px;
+  color: #555;
+  padding-left: 10px;
 }

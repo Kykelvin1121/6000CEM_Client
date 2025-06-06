@@ -93,7 +93,7 @@ const TrackOrder = () => {
                         className="product-image"
                       />
                       <p className="product-name">{product.title}</p>
-                      {/* Quantity removed as requested */}
+                      <span className="product-quantity">x{product.qty || 1}</span>
                     </li>
                   ))}
                 </ul>
@@ -106,9 +106,12 @@ const TrackOrder = () => {
 
                 <hr className="separator-line" />
 
-                <h5 className="shipping-address-title">Shipping Address</h5>
-                <p className="shipping-address">
-                  {order.shippingAddress || "No shipping address provided"}
+                <h5 className="delivery-info-title">Delivery Information</h5>
+                <p className="delivery-username">
+                  {order.username} ({order.phoneNumber})
+                </p>
+                <p className="delivery-address">
+                  {order.shippingAddress || "No delivery address provided"}
                 </p>
               </div>
             </div>

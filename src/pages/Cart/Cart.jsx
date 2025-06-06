@@ -10,6 +10,8 @@ import {
   updateDoc,
   doc,
   getDoc,
+  getDocs,
+  deleteDoc,
   serverTimestamp,
 } from "firebase/firestore";
 import "./Cart.css";
@@ -26,7 +28,7 @@ const Cart = () => {
   const [userAddress, setUserAddress] = useState("");
   const history = useNavigate();
 
-  // Fetch user address
+  // Fetch user address on component mount
   useEffect(() => {
     const fetchUserAddress = async () => {
       const user = getAuth().currentUser;
@@ -45,9 +47,23 @@ const Cart = () => {
     const user = getAuth().currentUser;
 
     if (!user) {
-      console.log("User is not logged in");
+      toast.error("You must be logged in.");
       return;
     }
+
+    // Fetch user data (address, username, phone)
+    const userDocRef = doc(db, "users", user.uid);
+    const userDocSnap = await getDoc(userDocRef);
+
+    if (!userDocSnap.exists()) {
+      toast.error("User data not found.");
+      return;
+    }
+
+    const userData = userDocSnap.data();
+    const userAddress = userData.address || "";
+    const username = userData.username || "No username";
+    const phoneNumber = userData.phoneNumber || "No phone";
 
     if (!userAddress) {
       toast.error("User address not found.");
@@ -56,6 +72,7 @@ const Cart = () => {
 
     let hasSufficientQuantity = true;
 
+    // Check product quantities in Firestore
     for (const item of CartItem) {
       const productDocRef = doc(db, "products", item.id);
       const productSnapshot = await getDoc(productDocRef);
@@ -78,9 +95,12 @@ const Cart = () => {
       return;
     }
 
+    // Create order
     const ordersCollection = collection(db, "orders");
     const orderData = {
       userId: user.uid,
+      username: username,
+      phoneNumber: phoneNumber,
       products: CartItem,
       shippingAddress: userAddress,
       totalPrice: totalPrice,
@@ -90,6 +110,7 @@ const Cart = () => {
 
     await addDoc(ordersCollection, orderData);
 
+    // Update product quantities in Firestore
     for (const item of CartItem) {
       const productDocRef = doc(db, "products", item.id);
       const productSnapshot = await getDoc(productDocRef);
@@ -102,6 +123,14 @@ const Cart = () => {
       }
     }
 
+    // Clear user's cart in Firestore
+    const cartRef = collection(db, "carts", user.uid, "items");
+    const cartSnapshot = await getDocs(cartRef);
+    for (const cartDoc of cartSnapshot.docs) {
+      await deleteDoc(cartDoc.ref);
+    }
+
+    // Clear cart in app and localStorage
     setCartItem([]);
     localStorage.removeItem("cartItem");
     history("/home");
@@ -115,9 +144,7 @@ const Cart = () => {
       const storedCart = localStorage.getItem("cartItem");
       if (storedCart) {
         const parsedCart = JSON.parse(storedCart);
-        const userCart = parsedCart.filter(
-          (item) => item.userId === user.uid
-        );
+        const userCart = parsedCart.filter((item) => item.userId === user.uid);
         setCartItem(userCart);
       }
     }
@@ -215,7 +242,6 @@ const Cart = () => {
                 <div className="d_flex">
                   <h4>Shipping Address:</h4>
                   <p>{userAddress}</p>
-                  <h7>Free Shipping</h7>
                   <h4>Total Price:</h4>
                   <h3>RM{totalPrice}.00</h3>
                 </div>

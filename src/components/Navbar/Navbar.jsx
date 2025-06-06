@@ -113,7 +113,7 @@ const NavBar = () => {
                 <div className="icon-container">
                   <i className="fas fa-user nav-icon"></i>
                 </div>
-                <span className="username-text">{userName || "Welcome Guest"}</span>
+                <span className="username-text">{userName || "Guest"}</span>
 
                 {hoveringProfile && (
                   <div className="dropDownProfile">

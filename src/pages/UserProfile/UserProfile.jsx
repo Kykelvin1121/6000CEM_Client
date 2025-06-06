@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { db, auth } from "../../FirebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { toast } from "react-toastify";         // <-- import toast
-import 'react-toastify/dist/ReactToastify.css'; // <-- import toast styles
+import { toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 import './UserProfile.css';
 
 const validStates = [
@@ -21,9 +21,9 @@ const isValidAddress = (street, postcode, state) => {
 
 const parseAddress = (addressString) => {
   if (!addressString) return { street: "", postcode: "", state: "" };
-  
+
   const parts = addressString.split(",").map(part => part.trim());
-  
+
   if (parts.length >= 3) {
     return {
       street: parts.slice(0, parts.length - 2).join(", "),
@@ -98,7 +98,8 @@ const UserProfile = () => {
       const combinedAddress = combineAddress(street, postcode, state);
 
       await updateDoc(userDocRef, {
-        ...userProfile,
+        username: userProfile.username,
+        phoneNumber: userProfile.phoneNumber,
         address: combinedAddress,
       });
 
@@ -110,7 +111,7 @@ const UserProfile = () => {
 
   return (
     <div className="profile-container">
-      {/* ToastContainer can be here or preferably in your app root */}
+      {/* ToastContainer can be here or in your App.js */}
       {/* <ToastContainer /> */}
 
       <h1>User Profile</h1>
@@ -123,9 +124,8 @@ const UserProfile = () => {
             type="email"
             id="email"
             value={userProfile.email}
-            onChange={(e) =>
-              setUserProfile({ ...userProfile, email: e.target.value })
-            }
+            readOnly
+            style={{ backgroundColor: "#f5f5f5", cursor: "not-allowed" }}
           />
         </div>
 
