@@ -264,7 +264,7 @@ function RegisterAndLogin({ onLogin }) {
         </p>
 
         <button className="form-button" type="submit">
-          {login ? "Sign In" : "Sign Up"}
+          {login ? "Login" : "Sign Up"}
         </button>
       </form>
     </div>

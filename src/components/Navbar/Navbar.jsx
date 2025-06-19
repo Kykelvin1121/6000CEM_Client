@@ -122,7 +122,7 @@ const NavBar = () => {
                         <li>
                           <a
                             className="dropDown"
-                            href="https://dashboard-project-five.vercel.app/"
+                            href="https://6000-cem-admin.vercel.app/"
                             target="_blank"
                             rel="noopener noreferrer"
                           >
