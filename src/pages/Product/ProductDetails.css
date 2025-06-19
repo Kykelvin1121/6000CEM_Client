@@ -46,3 +46,21 @@
   font-weight: 500;
   margin-bottom: 20px;
 }
+
+.related-products-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sort-select label {
+  margin-right: 8px;
+  font-weight: 500;
+}
+
+.sort-select select {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}

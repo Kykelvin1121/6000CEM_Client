@@ -168,7 +168,7 @@ function RegisterAndLogin({ onLogin }) {
             className={`form-tab ${login ? "active-tab" : ""}`}
             onClick={() => setLogin(true)}
           >
-            Sign In
+            Login
           </div>
         </div>
         <div className="form-header">
@@ -181,7 +181,7 @@ function RegisterAndLogin({ onLogin }) {
         </div>
       </div>
 
-      <h1 className="form-title">{login ? "Sign In" : "Sign Up"}</h1>
+      <h1 className="form-title">{login ? "Login" : "Sign Up"}</h1>
 
       <form onSubmit={(e) => handleSubmit(e, login ? "signin" : "signup")}>
         <input

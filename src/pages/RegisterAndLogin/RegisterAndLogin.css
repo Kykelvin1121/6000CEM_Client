@@ -70,13 +70,13 @@
   
   .forgot-password {
     cursor: pointer;
-    color: #004792;
+    color: #0077FF;
     text-decoration: underline;
     margin-top: 10px;
   }
   
   .form-button {
-    background-color: #004792;
+    background-color: #0077FF;
     color: white;
     border: none;
     padding: 10px;
