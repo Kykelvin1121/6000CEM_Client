@@ -36,9 +36,9 @@ const TrackOrder = () => {
     switch (status) {
       case "processing":
         return "blue-color";
-      case "shipping":
+      case "delivering":
         return "yellow-color";
-      case "delivered":
+      case "completed":
         return "green-color";
       default:
         return "";
