@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { db, auth } from "../../FirebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import './UserProfile.css';
 
@@ -80,6 +80,17 @@ const UserProfile = () => {
   }, []);
 
   const handleProfileUpdate = async () => {
+    if (!userProfile.username.trim()) {
+      toast.error("Username cannot be empty.");
+      return;
+    }
+
+    const phonePattern = /^01\d{8,9}$/;
+    if (!phonePattern.test(userProfile.phoneNumber.trim())) {
+      toast.error("Invalid phone number. It should start with '01' and be 10 or 11 digits.");
+      return;
+    }
+
     if (!isValidAddress(street, postcode, state)) {
       toast.error(
         "Invalid address. Ensure street ≥ 5 characters, postcode = 5 digits, and state is selected."
@@ -111,8 +122,7 @@ const UserProfile = () => {
 
   return (
     <div className="profile-container">
-      {/* ToastContainer can be here or in your App.js */}
-      {/* <ToastContainer /> */}
+      <ToastContainer />
 
       <h1>User Profile</h1>
 
