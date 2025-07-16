@@ -1,7 +1,21 @@
-/*   ---Shop Pages---   */
-.image-container {
-    position: relative;
-    width: 100%;
-    content: space-evenly;
-  }
-  
+.sort-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 10px;
+}
+
+.sort-container label {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.sort-container select {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  background-color: white;
+  cursor: pointer;
+}
